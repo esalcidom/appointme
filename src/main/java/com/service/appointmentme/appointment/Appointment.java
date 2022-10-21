@@ -1,26 +1,43 @@
 package com.service.appointmentme.appointment;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.*;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Document
+@ToString
+@Entity
+@Table
 public class Appointment {
 
     @Id
-    private String id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    private UUID id;
     private String description;
     private ZonedDateTime dateTime;
     private ZonedDateTime created;
     private ZonedDateTime updated;
+
+    public void validateTimeData(){
+        if(dateTime == null){
+            dateTime = ZonedDateTime.now(ZoneOffset.UTC);
+        }
+        if(created == null){
+            created = ZonedDateTime.now(ZoneOffset.UTC);
+        }
+        if(updated == null){
+            updated = ZonedDateTime.now(ZoneOffset.UTC);
+        }
+    }
 
 }
