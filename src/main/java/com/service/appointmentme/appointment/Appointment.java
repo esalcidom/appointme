@@ -30,7 +30,7 @@ public class Appointment {
     @NotBlank
     @Size(min=1, max=30, message="Description should be between 1 and 30 characters long" )
     private String description;
-    @NotBlank
+//    @NotBlank
 //    @NotNull
     private ZonedDateTime dateTime;
     private ZonedDateTime created;

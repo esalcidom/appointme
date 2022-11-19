@@ -31,7 +31,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
 
         CustomUserDetails customUserDetails = userService.loadUserByUsername(username);
-
         switch(customUserDetails.getUser().getAlgorithm()){
             case BCRYPT:
                 return checkPassword(customUserDetails, password, bCryptPasswordEncoder);
@@ -50,7 +49,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     private Authentication checkPassword(CustomUserDetails customUserDetails, String password, PasswordEncoder encoder){
 
         if(encoder.matches(password, customUserDetails.getPassword())){
-            logger.info("password matched!");
             return new UsernamePasswordAuthenticationToken(
               customUserDetails.getUsername(),
               customUserDetails.getPassword(),

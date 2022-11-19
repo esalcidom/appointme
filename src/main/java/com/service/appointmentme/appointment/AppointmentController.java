@@ -13,9 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 public class AppointmentController {
@@ -33,12 +31,25 @@ public class AppointmentController {
     }
 
     @PostMapping(value = "/appointment", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> createAppointment(@Valid @RequestBody Appointment appointment){
+    public ResponseEntity<Object> createAppointment(@RequestBody Appointment appointment){
         logger.info("Create new Appointment with payload. {}", appointment.toString());
         appointment.validateTimeData();
         Appointment newAppointment = appointmentRepository.save(appointment);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("appointment/{id}").buildAndExpand(newAppointment.getId()).toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    @PutMapping(value = "/appointment/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> updateAppointment(@PathVariable UUID id, @RequestBody Appointment appointment){
+        logger.info("Update appointment with payload. {}", appointment.toString());
+        Optional<Appointment> ownedAppointment = appointmentRepository.findById(id);
+        if(ownedAppointment.isPresent()){
+            appointment.setId(ownedAppointment.get().getId());
+            Appointment updatedAppointment = appointmentRepository.save(appointment);
+            return ResponseEntity.ok().body("Updated");
+        } else {
+            return ResponseEntity.badRequest().body("wrong");
+        }
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

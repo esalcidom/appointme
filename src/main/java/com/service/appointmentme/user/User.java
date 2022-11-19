@@ -24,7 +24,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name="algorithm")
     private EncryptAlgorithm algorithm;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "authority_id"))
     private List<Authority> authority;
     private ZonedDateTime created;
