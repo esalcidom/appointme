@@ -13,6 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @RestController
@@ -23,29 +24,50 @@ public class AppointmentController {
     @Autowired
     AppointmentRepository appointmentRepository;
 
-    @GetMapping(value = "/appointment", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getAllAppointments(){
-        logger.info("Get all appointments");
+    @GetMapping(value = "/db/appointment", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getAllDbAppointments(){
         List<Appointment> appointments = appointmentRepository.findAll();
         return ResponseEntity.accepted().body(appointments);
     }
 
+    @GetMapping(value = "/appointment", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getAllAppointments(){
+        logger.info("Get all appointments");
+        List<Appointment> appointments = appointmentRepository.findAll();
+        List<AppointmentDTO> appointmentDTOList = new ArrayList<>();
+        for(Appointment a: appointments){
+            appointmentDTOList.add(AppointmentDTO.from(a));
+        }
+        return ResponseEntity.accepted().body(appointmentDTOList);
+    }
+
     @PostMapping(value = "/appointment", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> createAppointment(@RequestBody Appointment appointment){
-        logger.info("Create new Appointment with payload. {}", appointment.toString());
-        appointment.validateTimeData();
+    public ResponseEntity<Object> createAppointment(@Valid @RequestBody AppointmentDTO appointmentDTO){
+        logger.info("Create new Appointment with payload. {}", appointmentDTO.toString());
+        Appointment appointment = Appointment.builder()
+                .description(appointmentDTO.getDescription())
+                .dateTime(appointmentDTO.getDateTime())
+                .created(ZonedDateTime.now())
+                .updated(ZonedDateTime.now())
+                .build();
         Appointment newAppointment = appointmentRepository.save(appointment);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("appointment/{id}").buildAndExpand(newAppointment.getId()).toUri();
         return ResponseEntity.created(location).build();
     }
 
     @PutMapping(value = "/appointment/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> updateAppointment(@PathVariable UUID id, @RequestBody Appointment appointment){
-        logger.info("Update appointment with payload. {}", appointment.toString());
+    public ResponseEntity<Object> updateAppointment(@PathVariable UUID id, @Valid @RequestBody AppointmentDTO appointmentDTO){
+        logger.info("Update appointment with payload. {}", appointmentDTO.toString());
         Optional<Appointment> ownedAppointment = appointmentRepository.findById(id);
         if(ownedAppointment.isPresent()){
-            appointment.setId(ownedAppointment.get().getId());
-            Appointment updatedAppointment = appointmentRepository.save(appointment);
+            Appointment updatedAppointment = Appointment.builder()
+                    .id(id)
+                    .description(appointmentDTO.getDescription())
+                    .dateTime(appointmentDTO.getDateTime())
+                    .created(ownedAppointment.get().getCreated())
+                    .updated(ZonedDateTime.now())
+                    .build();
+            appointmentRepository.save(updatedAppointment);
             return ResponseEntity.ok().body("Updated");
         } else {
             return ResponseEntity.badRequest().body("wrong");

@@ -42,7 +42,9 @@ public class ProjectConfig extends WebSecurityConfigurerAdapter {
             .mvcMatchers(HttpMethod.GET, "/appointment")
                 .hasAnyAuthority("WRITE","READ")
             .mvcMatchers(HttpMethod.PUT, "/appointment/{id}")
-                .hasAuthority("WRITE");
+                .hasAuthority("WRITE")
+            .mvcMatchers(HttpMethod.GET, "/db/appointment")
+                .hasAnyAuthority("WRITE", "READ");
     }
 
 }
