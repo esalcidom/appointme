@@ -8,6 +8,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 public class ProjectConfig extends WebSecurityConfigurerAdapter {
@@ -16,15 +17,6 @@ public class ProjectConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private CustomAuthenticationProvider customAuthenticationProvider;
 
-/*    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public SCryptPasswordEncoder sCryptPasswordEncoder(){
-        return new SCryptPasswordEncoder();
-    }*/
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth){
@@ -35,7 +27,7 @@ public class ProjectConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.httpBasic();
         http.csrf().disable();
-        http
+        http.addFilterAfter(new AuthenticationLoggingFilter(), BasicAuthenticationFilter.class)
             .authorizeRequests()
             .mvcMatchers(HttpMethod.POST, "/appointment")
                 .hasAuthority("WRITE")

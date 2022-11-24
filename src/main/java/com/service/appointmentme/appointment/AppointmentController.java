@@ -19,7 +19,7 @@ import java.util.*;
 @RestController
 public class AppointmentController {
 
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     AppointmentRepository appointmentRepository;
